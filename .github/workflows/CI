@@ -1,0 +1,33 @@
+name: Minikube workflow
+on: push
+jobs:
+  minikube:
+    name: Start Kubernetes cluster
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Start Minikube
+        id: minikube
+        uses: hiberbee/github-action-minikube@latest
+        with:
+          profile: github
+                 
+      - name: Deploy manifests
+        run: |
+          kubectl apply -f manifests/deploy.yaml
+          kubectl apply -f manifests/service.yaml
+        working-directory: ${{ github.workspace }}
+        
+      - name: Get All Info
+        run: kubectl get all 
+          
+      - name: Get Minikube status
+        run: minikube status
+
+      - name: Get cluster info
+        run: kubectl cluster-info
+
+      - name: Get Test Service URLs
+        run: minikube service list
